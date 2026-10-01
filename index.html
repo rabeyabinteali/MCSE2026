@@ -91,10 +91,17 @@ function typeOf(title) {
 function load(rows) {
   EVENTS = []; NOTICES = []; COURSES = {};
   const clean = rows.map(r => r.map(x => (x || "").replace(/^\uFEFF/, "").trim()));
-  let h = clean.findIndex(r => r[0].toLowerCase() === "title");
-  h = h < 0 ? 0 : h;
+  // Find the header cell anywhere, so blank rows/columns around the table don't matter.
+  let h = -1, c = 0;
+  clean.some((r, i) => {
+    let j = r.findIndex(x => x.toLowerCase() === "title");
+    if (j < 0) { const k = r.findIndex(x => /time\s*\/\s*deadline/i.test(x)); if (k >= 2) j = k - 2; }
+    if (j >= 0) { h = i; c = j; return true; }
+    return false;
+  });
+  if (h < 0) return;
   clean.slice(h + 1).forEach(r => {
-    const [title = "", code = "", when = "", content = "", cCode = "", cName = ""] = r;
+    const [title = "", code = "", when = "", content = "", cCode = "", cName = ""] = r.slice(c);
     if (/^[A-Za-z]{2,5}\d{3,4}$/.test(cCode) && cName) COURSES[cCode] = cName;
     if (!title) return;
     const type = typeOf(title);
@@ -187,7 +194,7 @@ fetch(CSV_URL, { cache: "no-cache" })
     load(rows);
     if (!EVENTS.length && !NOTICES.length) {
       $("sub").textContent = "";
-      $("upcoming").replaceChildren(el("div", "err", `Read ${rows.length} rows but found no schedule items. First row: ${JSON.stringify((rows[0] || []).slice(0, 4))}`));
+      $("upcoming").replaceChildren(el("div", "err", `Read ${rows.length} rows but found no "Title" header. Rows seen: ${JSON.stringify(rows.slice(0, 3).map(r => r.slice(0, 6)))}`));
       return;
     }
     render(); setInterval(render, 30000);
