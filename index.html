@@ -34,6 +34,12 @@ border-left:6px solid var(--c,var(--other));border-radius:6px;padding:14px 16px;
 .past{opacity:.6}
 details summary{cursor:pointer;color:var(--mute);font-weight:600;margin:32px 0 10px}
 summary:focus-visible{outline:2px solid var(--assignment);outline-offset:3px}
+.tabs{display:flex;gap:24px;border-bottom:1px solid var(--line);margin:16px 0 8px}
+.tabs a{color:var(--mute);text-decoration:none;font-weight:600;padding:8px 0;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tabs a:focus-visible,.link:focus-visible{outline:2px solid var(--assignment);outline-offset:3px}
+.course{display:block}
+.link{display:inline-block;margin:8px 16px 0 0;color:var(--assignment);font-weight:600}
 .err{background:var(--card);border:1px solid var(--ct);border-radius:6px;padding:14px 16px}
 footer{color:var(--mute);font-size:.85rem;margin-top:32px}
 @media(max-width:480px){.item{grid-template-columns:1fr;gap:6px}}
@@ -42,10 +48,17 @@ footer{color:var(--mute);font-size:.85rem;margin-top:32px}
 <body>
 <main>
   <h1>MCSE batch schedule</h1>
-  <p class="sub" id="sub">Loading…</p>
-  <div id="notices"></div>
-  <div id="upcoming"></div>
-  <details id="pastBox" hidden><summary id="pastSum">Previous</summary><div id="past"></div></details>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#home" id="tab-home">Home</a>
+    <a href="#lectures" id="tab-lectures">Lectures</a>
+  </nav>
+  <section id="home">
+    <p class="sub" id="sub">Loading…</p>
+    <div id="notices"></div>
+    <div id="upcoming"></div>
+    <details id="pastBox" hidden><summary id="pastSum">Previous</summary><div id="past"></div></details>
+  </section>
+  <section id="lectures" hidden></section>
   <footer id="foot"></footer>
 </main>
 
@@ -189,11 +202,51 @@ function render() {
   $("foot").textContent = UPDATED ? `Schedule last synced ${UPDATED}` : "";
 }
 
+// ---- Lectures tab: add your Drive links here (one line per link) ----
+const LECTURES = [
+  { code: "MCSE1203", title: "Drive folder", url: "https://drive.google.com/drive/folders/1jrybNbLNtp45trD54ly4emqnITcZZsLr" },
+  { code: "MCSE1204", title: "Drive folder", url: "https://drive.google.com/drive/folders/1uu1ePqixsXI24t5mFBX2Hxa1vRPutyCi" },
+  { code: "MCSE1214", title: "Drive folder", url: "https://drive.google.com/drive/folders/1f1lOm6OVKHj-ydDiHDhU_5qGacHVCB9f" },
+  { code: "GED1200",  title: "Drive folder", url: "https://drive.google.com/drive/folders/1L7mCMNA8jvTNVHQI2tjBBPWsTWvJUAbj" },
+];
+
+function renderLectures() {
+  const codes = [...new Set([...Object.keys(COURSES), ...LECTURES.map(l => l.code)])].sort();
+  const box = $("lectures");
+  if (!codes.length) { box.replaceChildren(el("p", "empty", "No courses found yet.")); return; }
+  box.replaceChildren(...codes.map(code => {
+    const card = el("article", "item course");
+    card.style.setProperty("--c", "var(--class)");
+    card.appendChild(el("div", "t", COURSES[code] || code));
+    card.appendChild(el("div", "meta", code));
+    const links = LECTURES.filter(l => l.code === code && /^https?:\/\//.test(l.url));
+    if (!links.length) card.appendChild(el("div", "body", "No links added yet."));
+    links.forEach(l => {
+      const a = el("a", "link", (l.title || "Open folder") + " \u2197");
+      a.href = l.url; a.target = "_blank"; a.rel = "noopener";
+      card.appendChild(a);
+    });
+    return card;
+  }));
+}
+
+function showTab() {
+  const t = location.hash === "#lectures" ? "lectures" : "home";
+  $("home").hidden = t !== "home";
+  $("lectures").hidden = t !== "lectures";
+  ["home", "lectures"].forEach(k => {
+    const a = $("tab-" + k);
+    if (k === t) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+}
+window.addEventListener("hashchange", showTab);
+showTab(); renderLectures();
+
 fetch(CSV_URL, { cache: "no-cache" })
   .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); const lm = r.headers.get("last-modified"); if (lm) UPDATED = new Date(lm).toLocaleString("en-GB"); return r.text(); })
   .then(txt => {
     const rows = Papa.parse(txt.trim(), { skipEmptyLines: true }).data;
-    load(rows);
+    load(rows); renderLectures();
     if (!EVENTS.length && !NOTICES.length) {
       $("sub").textContent = "";
       $("upcoming").replaceChildren(el("div", "err", `Read ${rows.length} rows but found no "Title" header. Rows seen: ${JSON.stringify(rows.slice(0, 3).map(r => r.slice(0, 6)))}`));
