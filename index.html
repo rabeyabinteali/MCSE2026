@@ -18,8 +18,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Schibsted Gro
 padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
 main{max-width:720px;margin:0 auto}
 h1{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;margin:24px 0 4px}
-h2{font-size:1.05rem;font-weight:600;color:var(--mute);margin:32px 0 10px}
-.sub{color:var(--mute);margin:0 0 8px;font-size:.95rem}
+h2{font-size:1.1rem;font-weight:600;margin:32px 0 10px}
+h2 span{color:var(--mute);font-weight:400;font-size:.9rem;margin-left:8px}
+.sub,.empty{color:var(--mute);margin:0 0 8px;font-size:.95rem}
 .item{display:grid;grid-template-columns:104px 1fr;gap:16px;background:var(--card);border:1px solid var(--line);
 border-left:6px solid var(--c,var(--other));border-radius:6px;padding:14px 16px;margin-bottom:10px}
 .cd{font-weight:800;font-size:1.35rem;line-height:1.15;letter-spacing:-.02em;color:var(--c)}
@@ -28,11 +29,11 @@ border-left:6px solid var(--c,var(--other));border-radius:6px;padding:14px 16px;
 .t{font-weight:600;font-size:1.05rem}
 .meta{color:var(--mute);font-size:.9rem}
 .body{margin-top:6px;white-space:pre-wrap;font-size:.95rem}
-.notice{display:block;border-left-color:var(--notice);background:var(--card)}
+.notice{display:block}
 .notice .t{color:var(--notice)}
 .past{opacity:.6}
 details summary{cursor:pointer;color:var(--mute);font-weight:600;margin:32px 0 10px}
-summary:focus-visible,a:focus-visible{outline:2px solid var(--assignment);outline-offset:3px}
+summary:focus-visible{outline:2px solid var(--assignment);outline-offset:3px}
 .err{background:var(--card);border:1px solid var(--ct);border-radius:6px;padding:14px 16px}
 footer{color:var(--mute);font-size:.85rem;margin-top:32px}
 @media(max-width:480px){.item{grid-template-columns:1fr;gap:6px}}
@@ -43,9 +44,8 @@ footer{color:var(--mute);font-size:.85rem;margin-top:32px}
   <h1>MCSE batch schedule</h1>
   <p class="sub" id="sub">Loading…</p>
   <div id="notices"></div>
-  <h2 id="upH" hidden>Coming up</h2>
   <div id="upcoming"></div>
-  <details id="pastBox" hidden><summary>Past items</summary><div id="past"></div></details>
+  <details id="pastBox" hidden><summary id="pastSum">Previous</summary><div id="past"></div></details>
   <footer id="foot"></footer>
 </main>
 
@@ -55,15 +55,26 @@ let EVENTS = [], NOTICES = [], COURSES = {}, UPDATED = "";
 
 const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const short = d => d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 
-// DD/MM/YYYY [h:mm AM/PM]  ->  {date, timed}
+// Accepts DD/MM/YYYY or ISO, with optional 12h (AM/PM) or 24h time, with or without seconds.
 function parseWhen(s) {
-  const m = /(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM))?/i.exec(s || "");
-  if (!m) return null;
-  let [, d, mo, y, h, mi, ap] = m;
-  const timed = h != null;
-  h = timed ? (+h % 12) + (ap.toUpperCase() === "PM" ? 12 : 0) : 23;
-  mi = timed ? +mi : 59;
+  s = (s || "").trim();
+  let y, mo, d, rest;
+  let m = /(\d{4})-(\d{1,2})-(\d{1,2})(.*)/.exec(s);
+  if (m) { [, y, mo, d, rest] = m; }
+  else {
+    m = /(\d{1,2})\/(\d{1,2})\/(\d{4})(.*)/.exec(s);
+    if (!m) return null;
+    [, d, mo, y, rest] = m;
+    if (+mo > 12) [d, mo] = [mo, d];          // M/D/YYYY fallback
+  }
+  const t = /(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i.exec(rest || "");
+  let h = 23, mi = 59, timed = false;
+  if (t) {
+    timed = true; h = +t[1]; mi = +t[2];
+    if (t[3]) h = (h % 12) + (t[3].toUpperCase() === "PM" ? 12 : 0);
+  }
   return { date: new Date(+y, +mo - 1, +d, h, mi), timed };
 }
 
@@ -79,13 +90,15 @@ function typeOf(title) {
 
 function load(rows) {
   EVENTS = []; NOTICES = []; COURSES = {};
-  rows.slice(1).forEach(r => {
-    const [title = "", code = "", when = "", content = "", cCode = "", cName = ""] = r.map(x => (x || "").trim());
+  const clean = rows.map(r => r.map(x => (x || "").replace(/^\uFEFF/, "").trim()));
+  let h = clean.findIndex(r => r[0].toLowerCase() === "title");
+  h = h < 0 ? 0 : h;
+  clean.slice(h + 1).forEach(r => {
+    const [title = "", code = "", when = "", content = "", cCode = "", cName = ""] = r;
     if (/^[A-Za-z]{2,5}\d{3,4}$/.test(cCode) && cName) COURSES[cCode] = cName;
     if (!title) return;
-    const w = parseWhen(when);
     const type = typeOf(title);
-    const item = { title, code: /^-+$/.test(code) ? "" : code, w, content, type, raw: when };
+    const item = { title, code: /^-+$/.test(code) ? "" : code, w: parseWhen(when), content, type, raw: when };
     (type === "notice" ? NOTICES : EVENTS).push(item);
   });
   EVENTS.sort((a, b) => (a.w?.date ?? 1e15) - (b.w?.date ?? 1e15));
@@ -93,31 +106,28 @@ function load(rows) {
 
 function countdown(item, now) {
   const diff = item.w.date - now;
-  if (diff < 0) return ["Passed", ""];
   const mins = Math.floor(diff / 60000), h = Math.floor(mins / 60), d = Math.floor(h / 24);
   if (d >= 1) return [`${d}d ${h % 24}h`, "left"];
   if (h >= 1) return [`${h}h ${mins % 60}m`, "left"];
-  return [`${mins}m`, "left"];
+  return [`${Math.max(mins, 0)}m`, "left"];
 }
 
 function fmt(item) {
   if (!item.w) return item.raw || "Date to be announced";
-  const o = { weekday: "short", day: "numeric", month: "short", year: "numeric" };
-  let s = item.w.date.toLocaleDateString("en-GB", o);
+  let s = item.w.date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
   if (item.w.timed) s += ", " + item.w.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   return s;
 }
 
-function card(item, now, isNotice) {
-  const box = el("article", "item" + (isNotice ? " notice" : ""));
+function card(item, now, mode) {            // mode: "notice" | "upcoming" | "past"
+  const box = el("article", "item" + (mode === "notice" ? " notice" : mode === "past" ? " past" : ""));
   box.style.setProperty("--c", `var(--${item.type})`);
-  if (!isNotice) {
+  if (mode === "upcoming") {
     const cd = el("div", "cd");
     if (item.w) {
       const [big, small] = countdown(item, now);
-      cd.textContent = big;
-      if (small) cd.appendChild(el("small", "", small));
-      if (item.w.date - now < 864e5 && item.w.date > now) cd.classList.add("soon");
+      cd.textContent = big; cd.appendChild(el("small", "", small));
+      if (item.w.date - now < 864e5) cd.classList.add("soon");
     } else cd.textContent = "TBA";
     box.appendChild(cd);
   }
@@ -132,28 +142,59 @@ function card(item, now, isNotice) {
 
 function render() {
   const now = new Date();
-  const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()) - 7 * 864e5;
-  $("notices").replaceChildren(...NOTICES.filter(n => !n.w || +n.w.date >= dayStart).map(n => card(n, now, true)));
+  // Weeks run Fri-Sat. "This week" ends on the Saturday on/after today; "next week" ends 7 days later.
+  const end1 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((6 - now.getDay() + 7) % 7), 23, 59, 59, 999);
+  const end2 = new Date(end1); end2.setDate(end2.getDate() + 7);
 
-  const up = EVENTS.filter(e => !e.w || e.w.date >= now);
-  const past = EVENTS.filter(e => e.w && e.w.date < now).reverse();
-  $("upcoming").replaceChildren(...up.map(e => card(e, now)));
-  $("upH").hidden = !up.length;
-  $("past").replaceChildren(...past.map(e => { const c = card(e, now); c.classList.add("past"); return c; }));
+  const groups = [["This week", "until " + short(end1), [], "Nothing due this week."],
+                  ["Next week", "until " + short(end2), [], "Nothing due next week."],
+                  ["Later", "", [], ""]];
+  const past = [];
+  EVENTS.forEach(e => {
+    if (e.w && e.w.date < now) past.push(e);
+    else if (e.w && e.w.date <= end1) groups[0][2].push(e);
+    else if (e.w && e.w.date <= end2) groups[1][2].push(e);
+    else groups[2][2].push(e);
+  });
+
+  const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()) - 7 * 864e5;
+  $("notices").replaceChildren(...NOTICES.filter(n => !n.w || +n.w.date >= dayStart).map(n => card(n, now, "notice")));
+
+  const nodes = [];
+  groups.forEach(([name, range, items, none]) => {
+    if (!items.length && !none) return;
+    const h = el("h2", "", name); if (range) h.appendChild(el("span", "", range));
+    nodes.push(h);
+    if (items.length) items.forEach(e => nodes.push(card(e, now, "upcoming")));
+    else nodes.push(el("p", "empty", none));
+  });
+  $("upcoming").replaceChildren(...nodes);
+
+  past.reverse();
+  $("past").replaceChildren(...past.map(e => card(e, now, "past")));
+  $("pastSum").textContent = `Previous (${past.length})`;
   $("pastBox").hidden = !past.length;
 
-  const next = up.find(e => e.w);
+  const next = EVENTS.find(e => e.w && e.w.date >= now);
   $("sub").textContent = next ? `Next: ${next.title}${next.code ? " (" + next.code + ")" : ""}` : "Nothing due right now.";
   $("foot").textContent = UPDATED ? `Schedule last synced ${UPDATED}` : "";
 }
 
 fetch(CSV_URL, { cache: "no-cache" })
-  .then(r => { if (!r.ok) throw new Error(r.status); const lm = r.headers.get("last-modified"); if (lm) UPDATED = new Date(lm).toLocaleString("en-GB"); return r.text(); })
-  .then(txt => { load(Papa.parse(txt.trim(), { skipEmptyLines: true }).data); render(); setInterval(render, 30000); })
-  .catch(() => {
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); const lm = r.headers.get("last-modified"); if (lm) UPDATED = new Date(lm).toLocaleString("en-GB"); return r.text(); })
+  .then(txt => {
+    const rows = Papa.parse(txt.trim(), { skipEmptyLines: true }).data;
+    load(rows);
+    if (!EVENTS.length && !NOTICES.length) {
+      $("sub").textContent = "";
+      $("upcoming").replaceChildren(el("div", "err", `Read ${rows.length} rows but found no schedule items. First row: ${JSON.stringify((rows[0] || []).slice(0, 4))}`));
+      return;
+    }
+    render(); setInterval(render, 30000);
+  })
+  .catch(err => {
     $("sub").textContent = "";
-    const e = el("div", "err", "Couldn't load data/schedule.csv. Run the \"Sync schedule from Google Sheet\" workflow once from the GitHub Actions tab, then refresh.");
-    $("upcoming").replaceChildren(e);
+    $("upcoming").replaceChildren(el("div", "err", `Couldn't load data/schedule.csv (${err.message}). Run the sync workflow once from the GitHub Actions tab, then refresh.`));
   });
 </script>
 </body>
