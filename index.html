@@ -21,9 +21,9 @@ h1{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;margin:24px 0 4px}
 h2{font-size:1.1rem;font-weight:600;margin:32px 0 10px}
 h2 span{color:var(--mute);font-weight:400;font-size:.9rem;margin-left:8px}
 .sub,.empty{color:var(--mute);margin:0 0 8px;font-size:.95rem}
-.item{display:grid;grid-template-columns:104px 1fr;gap:16px;background:var(--card);border:1px solid var(--line);
+.item{display:grid;grid-template-columns:128px 1fr;gap:16px;background:var(--card);border:1px solid var(--line);
 border-left:6px solid var(--c,var(--other));border-radius:6px;padding:14px 16px;margin-bottom:10px}
-.cd{font-weight:800;font-size:1.35rem;line-height:1.15;letter-spacing:-.02em;color:var(--c)}
+.cd{font-weight:800;font-size:1.2rem;line-height:1.15;letter-spacing:-.02em;color:var(--c)}
 .cd small{display:block;font-weight:400;font-size:.8rem;color:var(--mute);letter-spacing:0;margin-top:2px}
 .cd.soon{text-decoration:underline;text-underline-offset:4px}
 .t{font-weight:600;font-size:1.05rem}
@@ -114,7 +114,7 @@ function load(rows) {
 function countdown(item, now) {
   const diff = item.w.date - now;
   const mins = Math.floor(diff / 60000), h = Math.floor(mins / 60), d = Math.floor(h / 24);
-  if (d >= 1) return [`${d}d ${h % 24}h`, "left"];
+  if (d >= 1) return [`${d}d ${h % 24}h ${mins % 60}m`, "left"];
   if (h >= 1) return [`${h}h ${mins % 60}m`, "left"];
   return [`${Math.max(mins, 0)}m`, "left"];
 }
@@ -197,7 +197,7 @@ fetch(CSV_URL, { cache: "no-cache" })
       $("upcoming").replaceChildren(el("div", "err", `Read ${rows.length} rows but found no "Title" header. Rows seen: ${JSON.stringify(rows.slice(0, 3).map(r => r.slice(0, 6)))}`));
       return;
     }
-    render(); setInterval(render, 30000);
+    render(); setInterval(render, 15000);
   })
   .catch(err => {
     $("sub").textContent = "";
