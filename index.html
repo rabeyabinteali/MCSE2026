@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCSE Batch Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{--bg:#eef1f5;--card:#fff;--ink:#14213d;--mute:#5c6780;--line:#d5dbe4;
+--ct:#d1344a;--assignment:#2457d6;--presentation:#7a3fd0;--lab:#0e8a6f;--notice:#b7791f;--other:#5c6780}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1524;--card:#18203a;--ink:#e8ecf6;--mute:#9aa6c2;--line:#2a3456;
+--ct:#ff6b80;--assignment:#7ea1ff;--presentation:#b995f5;--lab:#4fd1b0;--notice:#f0b955;--other:#9aa6c2}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Schibsted Grotesk",system-ui,sans-serif;
+padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+main{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;margin:24px 0 4px}
+h2{font-size:1.05rem;font-weight:600;color:var(--mute);margin:32px 0 10px}
+.sub{color:var(--mute);margin:0 0 8px;font-size:.95rem}
+.item{display:grid;grid-template-columns:104px 1fr;gap:16px;background:var(--card);border:1px solid var(--line);
+border-left:6px solid var(--c,var(--other));border-radius:6px;padding:14px 16px;margin-bottom:10px}
+.cd{font-weight:800;font-size:1.35rem;line-height:1.15;letter-spacing:-.02em;color:var(--c)}
+.cd small{display:block;font-weight:400;font-size:.8rem;color:var(--mute);letter-spacing:0;margin-top:2px}
+.cd.soon{text-decoration:underline;text-underline-offset:4px}
+.t{font-weight:600;font-size:1.05rem}
+.meta{color:var(--mute);font-size:.9rem}
+.body{margin-top:6px;white-space:pre-wrap;font-size:.95rem}
+.notice{display:block;border-left-color:var(--notice);background:var(--card)}
+.notice .t{color:var(--notice)}
+.past{opacity:.6}
+details summary{cursor:pointer;color:var(--mute);font-weight:600;margin:32px 0 10px}
+summary:focus-visible,a:focus-visible{outline:2px solid var(--assignment);outline-offset:3px}
+.err{background:var(--card);border:1px solid var(--ct);border-radius:6px;padding:14px 16px}
+footer{color:var(--mute);font-size:.85rem;margin-top:32px}
+@media(max-width:480px){.item{grid-template-columns:1fr;gap:6px}}
+</style>
+</head>
+<body>
+<main>
+  <h1>MCSE batch schedule</h1>
+  <p class="sub" id="sub">Loading…</p>
+  <div id="notices"></div>
+  <h2 id="upH" hidden>Coming up</h2>
+  <div id="upcoming"></div>
+  <details id="pastBox" hidden><summary>Past items</summary><div id="past"></div></details>
+  <footer id="foot"></footer>
+</main>
+
+<script>
+const CSV_URL = "data/schedule.csv";
+let EVENTS = [], NOTICES = [], COURSES = {}, UPDATED = "";
+
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+// DD/MM/YYYY [h:mm AM/PM]  ->  {date, timed}
+function parseWhen(s) {
+  const m = /(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM))?/i.exec(s || "");
+  if (!m) return null;
+  let [, d, mo, y, h, mi, ap] = m;
+  const timed = h != null;
+  h = timed ? (+h % 12) + (ap.toUpperCase() === "PM" ? 12 : 0) : 23;
+  mi = timed ? +mi : 59;
+  return { date: new Date(+y, +mo - 1, +d, h, mi), timed };
+}
+
+function typeOf(title) {
+  const t = title.toLowerCase();
+  if (t.startsWith("notice")) return "notice";
+  if (t.includes("assignment")) return "assignment";
+  if (t.includes("presentation")) return "presentation";
+  if (t.includes("lab")) return "lab";
+  if (/^ct\b|^ct-/.test(t)) return "ct";
+  return "other";
+}
+
+function load(rows) {
+  EVENTS = []; NOTICES = []; COURSES = {};
+  rows.slice(1).forEach(r => {
+    const [title = "", code = "", when = "", content = "", cCode = "", cName = ""] = r.map(x => (x || "").trim());
+    if (/^[A-Za-z]{2,5}\d{3,4}$/.test(cCode) && cName) COURSES[cCode] = cName;
+    if (!title) return;
+    const w = parseWhen(when);
+    const type = typeOf(title);
+    const item = { title, code: /^-+$/.test(code) ? "" : code, w, content, type, raw: when };
+    (type === "notice" ? NOTICES : EVENTS).push(item);
+  });
+  EVENTS.sort((a, b) => (a.w?.date ?? 1e15) - (b.w?.date ?? 1e15));
+}
+
+function countdown(item, now) {
+  const diff = item.w.date - now;
+  if (diff < 0) return ["Passed", ""];
+  const mins = Math.floor(diff / 60000), h = Math.floor(mins / 60), d = Math.floor(h / 24);
+  if (d >= 1) return [`${d}d ${h % 24}h`, "left"];
+  if (h >= 1) return [`${h}h ${mins % 60}m`, "left"];
+  return [`${mins}m`, "left"];
+}
+
+function fmt(item) {
+  if (!item.w) return item.raw || "Date to be announced";
+  const o = { weekday: "short", day: "numeric", month: "short", year: "numeric" };
+  let s = item.w.date.toLocaleDateString("en-GB", o);
+  if (item.w.timed) s += ", " + item.w.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return s;
+}
+
+function card(item, now, isNotice) {
+  const box = el("article", "item" + (isNotice ? " notice" : ""));
+  box.style.setProperty("--c", `var(--${item.type})`);
+  if (!isNotice) {
+    const cd = el("div", "cd");
+    if (item.w) {
+      const [big, small] = countdown(item, now);
+      cd.textContent = big;
+      if (small) cd.appendChild(el("small", "", small));
+      if (item.w.date - now < 864e5 && item.w.date > now) cd.classList.add("soon");
+    } else cd.textContent = "TBA";
+    box.appendChild(cd);
+  }
+  const info = el("div");
+  info.appendChild(el("div", "t", item.title));
+  const course = item.code ? (COURSES[item.code] ? `${item.code} ${COURSES[item.code]}` : item.code) : "";
+  info.appendChild(el("div", "meta", [course, fmt(item)].filter(Boolean).join(" | ")));
+  if (item.content) info.appendChild(el("div", "body", item.content));
+  box.appendChild(info);
+  return box;
+}
+
+function render() {
+  const now = new Date();
+  const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()) - 7 * 864e5;
+  $("notices").replaceChildren(...NOTICES.filter(n => !n.w || +n.w.date >= dayStart).map(n => card(n, now, true)));
+
+  const up = EVENTS.filter(e => !e.w || e.w.date >= now);
+  const past = EVENTS.filter(e => e.w && e.w.date < now).reverse();
+  $("upcoming").replaceChildren(...up.map(e => card(e, now)));
+  $("upH").hidden = !up.length;
+  $("past").replaceChildren(...past.map(e => { const c = card(e, now); c.classList.add("past"); return c; }));
+  $("pastBox").hidden = !past.length;
+
+  const next = up.find(e => e.w);
+  $("sub").textContent = next ? `Next: ${next.title}${next.code ? " (" + next.code + ")" : ""}` : "Nothing due right now.";
+  $("foot").textContent = UPDATED ? `Schedule last synced ${UPDATED}` : "";
+}
+
+fetch(CSV_URL, { cache: "no-cache" })
+  .then(r => { if (!r.ok) throw new Error(r.status); const lm = r.headers.get("last-modified"); if (lm) UPDATED = new Date(lm).toLocaleString("en-GB"); return r.text(); })
+  .then(txt => { load(Papa.parse(txt.trim(), { skipEmptyLines: true }).data); render(); setInterval(render, 30000); })
+  .catch(() => {
+    $("sub").textContent = "";
+    const e = el("div", "err", "Couldn't load data/schedule.csv. Run the \"Sync schedule from Google Sheet\" workflow once from the GitHub Actions tab, then refresh.");
+    $("upcoming").replaceChildren(e);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+name: Sync schedule from Google Sheet
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 min (GitHub's minimum is ~5)
+  workflow_dispatch:          # manual "Run workflow" button
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download sheet as CSV
+        run: |
+          mkdir -p data
+          curl -fsSL -L \
+            "https://docs.google.com/spreadsheets/d/1kPhOYduO0NRqLM_R4VWG0BP5FYiwvcFLj7xjMKV57jE/export?format=csv&gid=0" \
+            -o data/schedule.csv
+
+      - name: Commit if changed
+        run: |
+          git config user.name "sheet-sync-bot"
+          git config user.email "sheet-sync-bot@users.noreply.github.com"
+          git add data/schedule.csv
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: sync schedule $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
