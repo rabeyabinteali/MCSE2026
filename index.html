@@ -10,9 +10,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 :root{--bg:#eef1f5;--card:#fff;--ink:#14213d;--mute:#5c6780;--line:#d5dbe4;
---ct:#d1344a;--assignment:#2457d6;--presentation:#7a3fd0;--lab:#0e8a6f;--notice:#b7791f;--other:#5c6780}
+--ct:#d1344a;--assignment:#2457d6;--presentation:#2457d6;--lab:#0e8a6f;--class:#0b7a9e;--notice:#b7791f;--other:#5c6780}
 @media(prefers-color-scheme:dark){:root{--bg:#0f1524;--card:#18203a;--ink:#e8ecf6;--mute:#9aa6c2;--line:#2a3456;
---ct:#ff6b80;--assignment:#7ea1ff;--presentation:#b995f5;--lab:#4fd1b0;--notice:#f0b955;--other:#9aa6c2}}
+--ct:#ff6b80;--assignment:#7ea1ff;--presentation:#7ea1ff;--lab:#4fd1b0;--class:#5cc8ec;--notice:#f0b955;--other:#9aa6c2}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Schibsted Grotesk",system-ui,sans-serif;
 padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
@@ -84,7 +84,8 @@ function typeOf(title) {
   if (t.includes("assignment")) return "assignment";
   if (t.includes("presentation")) return "presentation";
   if (t.includes("lab")) return "lab";
-  if (/^ct\b|^ct-/.test(t)) return "ct";
+  if (/^(class|lec|lecture)\b/.test(t)) return "class";
+  if (/^(ct\b|ct-|mid|final)/.test(t)) return "ct";
   return "other";
 }
 
@@ -113,10 +114,11 @@ function load(rows) {
 
 function countdown(item, now) {
   const diff = item.w.date - now;
+  const unit = item.type === "class" ? "to start" : "left";
   const mins = Math.floor(diff / 60000), h = Math.floor(mins / 60), d = Math.floor(h / 24);
-  if (d >= 1) return [`${d}d ${h % 24}h ${mins % 60}m`, "left"];
-  if (h >= 1) return [`${h}h ${mins % 60}m`, "left"];
-  return [`${Math.max(mins, 0)}m`, "left"];
+  if (d >= 1) return [`${d}d ${h % 24}h ${mins % 60}m`, unit];
+  if (h >= 1) return [`${h}h ${mins % 60}m`, unit];
+  return [`${Math.max(mins, 0)}m`, unit];
 }
 
 function fmt(item) {
