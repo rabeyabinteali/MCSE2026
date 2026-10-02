@@ -1,443 +1,262 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MCSE 2026 Schedule</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap"
-    rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <style>
-    :root {
-      --bg: #eef1f5;
-      --card: #fff;
-      --ink: #14213d;
-      --mute: #5c6780;
-      --line: #d5dbe4;
-      --ct: #d1344a;
-      --assignment: #2457d6;
-      --presentation: #2457d6;
-      --lab: #0e8a6f;
-      --class: #0b7a9e;
-      --notice: #b7791f;
-      --other: #5c6780
-    }
-
-    @media(prefers-color-scheme:dark) {
-      :root {
-        --bg: #0f1524;
-        --card: #18203a;
-        --ink: #e8ecf6;
-        --mute: #9aa6c2;
-        --line: #2a3456;
-        --ct: #ff6b80;
-        --assignment: #7ea1ff;
-        --presentation: #7ea1ff;
-        --lab: #4fd1b0;
-        --class: #5cc8ec;
-        --notice: #f0b955;
-        --other: #9aa6c2
-      }
-    }
-
-    * {
-      box-sizing: border-box
-    }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font: 16px/1.5 "Schibsted Grotesk", system-ui, sans-serif;
-      padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom))
-    }
-
-    main {
-      max-width: 720px;
-      margin: 0 auto
-    }
-
-    h1 {
-      font-size: 1.9rem;
-      font-weight: 800;
-      letter-spacing: -.02em;
-      margin: 24px 0 4px
-    }
-
-    h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin: 32px 0 10px
-    }
-
-    h2 span {
-      color: var(--mute);
-      font-weight: 400;
-      font-size: .9rem;
-      margin-left: 8px
-    }
-
-    .sub,
-    .empty {
-      color: var(--mute);
-      margin: 0 0 8px;
-      font-size: .95rem
-    }
-
-    .item {
-      display: grid;
-      grid-template-columns: 128px 1fr;
-      gap: 16px;
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-left: 6px solid var(--c, var(--other));
-      border-radius: 6px;
-      padding: 14px 16px;
-      margin-bottom: 10px
-    }
-
-    .cd {
-      font-weight: 800;
-      font-size: 1.2rem;
-      line-height: 1.15;
-      letter-spacing: -.02em;
-      color: var(--c)
-    }
-
-    .cd small {
-      display: block;
-      font-weight: 400;
-      font-size: .8rem;
-      color: var(--mute);
-      letter-spacing: 0;
-      margin-top: 2px
-    }
-
-    .cd.soon {
-      text-decoration: underline;
-      text-underline-offset: 4px
-    }
-
-    .t {
-      font-weight: 600;
-      font-size: 1.05rem
-    }
-
-    .meta {
-      color: var(--mute);
-      font-size: .9rem
-    }
-
-    .body {
-      margin-top: 6px;
-      white-space: pre-wrap;
-      font-size: .95rem
-    }
-
-    .notice {
-      display: block
-    }
-
-    .notice .t {
-      color: var(--notice)
-    }
-
-    .past {
-      opacity: .6
-    }
-
-    details summary {
-      cursor: pointer;
-      color: var(--mute);
-      font-weight: 600;
-      margin: 32px 0 10px
-    }
-
-    summary:focus-visible {
-      outline: 2px solid var(--assignment);
-      outline-offset: 3px
-    }
-
-    .tabs {
-      display: flex;
-      gap: 24px;
-      border-bottom: 1px solid var(--line);
-      margin: 16px 0 8px
-    }
-
-    .tabs a {
-      color: var(--mute);
-      text-decoration: none;
-      font-weight: 600;
-      padding: 8px 0;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -1px
-    }
-
-    .tabs a[aria-current="page"] {
-      color: var(--ink);
-      border-bottom-color: var(--ink)
-    }
-
-    .tabs a:focus-visible,
-    .link:focus-visible {
-      outline: 2px solid var(--assignment);
-      outline-offset: 3px
-    }
-
-    .course {
-      display: block
-    }
-
-    .link {
-      display: inline-block;
-      margin: 8px 16px 0 0;
-      color: var(--assignment);
-      font-weight: 600
-    }
-
-    .err {
-      background: var(--card);
-      border: 1px solid var(--ct);
-      border-radius: 6px;
-      padding: 14px 16px
-    }
-
-    footer {
-      color: var(--mute);
-      font-size: .85rem;
-      margin-top: 32px
-    }
-
-    @media(max-width:480px) {
-      .item {
-        grid-template-columns: 1fr;
-        gap: 6px
-      }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCSE Batch Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{--bg:#eef1f5;--card:#fff;--ink:#14213d;--mute:#5c6780;--line:#d5dbe4;
+--ct:#d1344a;--assignment:#2457d6;--presentation:#2457d6;--lab:#0e8a6f;--class:#0b7a9e;--notice:#b7791f;--other:#5c6780}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1524;--card:#18203a;--ink:#e8ecf6;--mute:#9aa6c2;--line:#2a3456;
+--ct:#ff6b80;--assignment:#7ea1ff;--presentation:#7ea1ff;--lab:#4fd1b0;--class:#5cc8ec;--notice:#f0b955;--other:#9aa6c2}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Schibsted Grotesk",system-ui,sans-serif;
+padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+main{max-width:720px;margin:0 auto}
+h1{font-size:1.9rem;font-weight:800;letter-spacing:-.02em;margin:24px 0 4px}
+h2{font-size:1.1rem;font-weight:600;margin:32px 0 10px}
+h2 span{color:var(--mute);font-weight:400;font-size:.9rem;margin-left:8px}
+.sub,.empty{color:var(--mute);margin:0 0 8px;font-size:.95rem}
+.item{display:grid;grid-template-columns:128px 1fr;gap:16px;background:var(--card);border:1px solid var(--line);
+border-left:6px solid var(--c,var(--other));border-radius:6px;padding:14px 16px;margin-bottom:10px}
+.cd{font-weight:800;font-size:1.2rem;line-height:1.15;letter-spacing:-.02em;color:var(--c)}
+.cd small{display:block;font-weight:400;font-size:.8rem;color:var(--mute);letter-spacing:0;margin-top:2px}
+.cd.soon{text-decoration:underline;text-underline-offset:4px}
+.t{font-weight:600;font-size:1.05rem}
+.meta{color:var(--mute);font-size:.9rem}
+.body{margin-top:6px;white-space:pre-wrap;font-size:.95rem}
+.notice{display:block}
+.notice .t{color:var(--notice)}
+.past{opacity:.6}
+details summary{cursor:pointer;color:var(--mute);font-weight:600;margin:32px 0 10px}
+summary:focus-visible{outline:2px solid var(--assignment);outline-offset:3px}
+.tabs{display:flex;gap:24px;border-bottom:1px solid var(--line);margin:16px 0 8px}
+.tabs a{color:var(--mute);text-decoration:none;font-weight:600;padding:8px 0;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tabs a:focus-visible,.link:focus-visible{outline:2px solid var(--assignment);outline-offset:3px}
+.course{display:block}
+.link{display:inline-block;margin:8px 16px 0 0;color:var(--assignment);font-weight:600}
+.err{background:var(--card);border:1px solid var(--ct);border-radius:6px;padding:14px 16px}
+footer{color:var(--mute);font-size:.85rem;margin-top:32px}
+@media(max-width:480px){.item{grid-template-columns:1fr;gap:6px}}
+</style>
 </head>
-
 <body>
-  <main>
-    <h1>MCSE 2026 Schedule</h1>
-    <nav class="tabs" aria-label="Sections">
-      <a href="#home" id="tab-home">Home</a>
-      <a href="#lectures" id="tab-lectures">Lectures</a>
-    </nav>
-    <section id="home">
-      <p class="sub" id="sub">Loading…</p>
-      <div id="notices"></div>
-      <div id="upcoming"></div>
-      <details id="pastBox" hidden>
-        <summary id="pastSum">Previous</summary>
-        <div id="past"></div>
-      </details>
-    </section>
-    <section id="lectures" hidden></section>
-    <footer id="foot"></footer>
-  </main>
+<main>
+  <h1>MCSE batch schedule</h1>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#home" id="tab-home">Home</a>
+    <a href="#lectures" id="tab-lectures">Lectures</a>
+  </nav>
+  <section id="home">
+    <p class="sub" id="sub">Loading…</p>
+    <div id="notices"></div>
+    <div id="upcoming"></div>
+    <details id="pastBox" hidden><summary id="pastSum">Previous</summary><div id="past"></div></details>
+  </section>
+  <section id="lectures" hidden></section>
+  <footer id="foot"></footer>
+</main>
 
-  <script>
-    const CSV_URL = "data/schedule.csv";
-    let EVENTS = [], NOTICES = [], COURSES = {}, UPDATED = "";
+<script>
+const CSV_URL = "data/schedule.csv";
+let EVENTS = [], NOTICES = [], COURSES = {}, UPDATED = "";
 
-    const $ = id => document.getElementById(id);
-    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-    const short = d => d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const short = d => d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 
-    // Accepts DD/MM/YYYY or ISO, with optional 12h (AM/PM) or 24h time, with or without seconds.
-    function parseWhen(s) {
-      s = (s || "").trim();
-      let y, mo, d, rest;
-      let m = /(\d{4})-(\d{1,2})-(\d{1,2})(.*)/.exec(s);
-      if (m) { [, y, mo, d, rest] = m; }
-      else {
-        m = /(\d{1,2})\/(\d{1,2})\/(\d{4})(.*)/.exec(s);
-        if (!m) return null;
-        [, d, mo, y, rest] = m;
-        if (+mo > 12) [d, mo] = [mo, d];          // M/D/YYYY fallback
-      }
-      const t = /(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i.exec(rest || "");
-      let h = 23, mi = 59, timed = false;
-      if (t) {
-        timed = true; h = +t[1]; mi = +t[2];
-        if (t[3]) h = (h % 12) + (t[3].toUpperCase() === "PM" ? 12 : 0);
-      }
-      return { date: new Date(+y, +mo - 1, +d, h, mi), timed };
+// Accepts DD/MM/YYYY or ISO, with optional 12h (AM/PM) or 24h time, with or without seconds.
+function parseWhen(s) {
+  s = (s || "").trim();
+  let y, mo, d, rest;
+  let m = /(\d{4})-(\d{1,2})-(\d{1,2})(.*)/.exec(s);
+  if (m) { [, y, mo, d, rest] = m; }
+  else {
+    m = /(\d{1,2})\/(\d{1,2})\/(\d{4})(.*)/.exec(s);
+    if (!m) return null;
+    [, d, mo, y, rest] = m;
+    if (+mo > 12) [d, mo] = [mo, d];          // M/D/YYYY fallback
+  }
+  const t = /(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i.exec(rest || "");
+  let h = 23, mi = 59, timed = false;
+  if (t) {
+    timed = true; h = +t[1]; mi = +t[2];
+    if (t[3]) h = (h % 12) + (t[3].toUpperCase() === "PM" ? 12 : 0);
+  }
+  return { date: new Date(+y, +mo - 1, +d, h, mi), timed };
+}
+
+function typeOf(title) {
+  const t = title.toLowerCase();
+  if (t.startsWith("notice")) return "notice";
+  if (t.includes("assignment")) return "assignment";
+  if (t.includes("presentation")) return "presentation";
+  if (t.includes("lab")) return "lab";
+  if (/^(class|lec|lecture)\b/.test(t)) return "class";
+  if (/^(ct\b|ct-|mid|final)/.test(t)) return "ct";
+  return "other";
+}
+
+function load(rows) {
+  EVENTS = []; NOTICES = []; COURSES = {};
+  const clean = rows.map(r => r.map(x => (x || "").replace(/^\uFEFF/, "").trim()));
+  // Find the header cell anywhere, so blank rows/columns around the table don't matter.
+  let h = -1, c = 0;
+  clean.some((r, i) => {
+    let j = r.findIndex(x => x.toLowerCase() === "title");
+    if (j < 0) { const k = r.findIndex(x => /time\s*\/\s*deadline/i.test(x)); if (k >= 2) j = k - 2; }
+    if (j >= 0) { h = i; c = j; return true; }
+    return false;
+  });
+  if (h < 0) return;
+  clean.slice(h + 1).forEach(r => {
+    const [title = "", code = "", when = "", content = "", cCode = "", cName = ""] = r.slice(c);
+    if (/^[A-Za-z]{2,5}\d{3,4}$/.test(cCode) && cName) COURSES[cCode] = cName;
+    if (!title) return;
+    const type = typeOf(title);
+    const item = { title, code: /^-+$/.test(code) ? "" : code, w: parseWhen(when), content, type, raw: when };
+    (type === "notice" ? NOTICES : EVENTS).push(item);
+  });
+  EVENTS.sort((a, b) => (a.w?.date ?? 1e15) - (b.w?.date ?? 1e15));
+}
+
+function countdown(item, now) {
+  const diff = item.w.date - now;
+  const unit = item.type === "class" ? "to start" : "left";
+  const mins = Math.floor(diff / 60000), h = Math.floor(mins / 60), d = Math.floor(h / 24);
+  if (d >= 1) return [`${d}d ${h % 24}h ${mins % 60}m`, unit];
+  if (h >= 1) return [`${h}h ${mins % 60}m`, unit];
+  return [`${Math.max(mins, 0)}m`, unit];
+}
+
+function fmt(item) {
+  if (!item.w) return item.raw || "Date to be announced";
+  let s = item.w.date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  if (item.w.timed) s += ", " + item.w.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return s;
+}
+
+function card(item, now, mode) {            // mode: "notice" | "upcoming" | "past"
+  const box = el("article", "item" + (mode === "notice" ? " notice" : mode === "past" ? " past" : ""));
+  box.style.setProperty("--c", `var(--${item.type})`);
+  if (mode === "upcoming") {
+    const cd = el("div", "cd");
+    if (item.w) {
+      const [big, small] = countdown(item, now);
+      cd.textContent = big; cd.appendChild(el("small", "", small));
+      if (item.w.date - now < 864e5) cd.classList.add("soon");
+    } else cd.textContent = "TBA";
+    box.appendChild(cd);
+  }
+  const info = el("div");
+  info.appendChild(el("div", "t", item.title));
+  const course = item.code ? (COURSES[item.code] ? `${item.code} ${COURSES[item.code]}` : item.code) : "";
+  info.appendChild(el("div", "meta", [course, fmt(item)].filter(Boolean).join(" | ")));
+  if (item.content) info.appendChild(el("div", "body", item.content));
+  box.appendChild(info);
+  return box;
+}
+
+function render() {
+  const now = new Date();
+  // Weeks run Fri-Sat. "This week" ends on the Saturday on/after today; "next week" ends 7 days later.
+  const end1 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((6 - now.getDay() + 7) % 7), 23, 59, 59, 999);
+  const end2 = new Date(end1); end2.setDate(end2.getDate() + 7);
+
+  const groups = [["This week", "until " + short(end1), [], "Nothing due this week."],
+                  ["Next week", "until " + short(end2), [], "Nothing due next week."],
+                  ["Later", "", [], ""]];
+  const past = [];
+  EVENTS.forEach(e => {
+    if (e.w && e.w.date < now) past.push(e);
+    else if (e.w && e.w.date <= end1) groups[0][2].push(e);
+    else if (e.w && e.w.date <= end2) groups[1][2].push(e);
+    else groups[2][2].push(e);
+  });
+
+  $("notices").replaceChildren(...NOTICES.filter(n => !n.w || n.w.date >= now).map(n => card(n, now, "notice")));
+
+  const nodes = [];
+  groups.forEach(([name, range, items, none]) => {
+    if (!items.length && !none) return;
+    const h = el("h2", "", name); if (range) h.appendChild(el("span", "", range));
+    nodes.push(h);
+    if (items.length) items.forEach(e => nodes.push(card(e, now, "upcoming")));
+    else nodes.push(el("p", "empty", none));
+  });
+  $("upcoming").replaceChildren(...nodes);
+
+  past.reverse();
+  $("past").replaceChildren(...past.map(e => card(e, now, "past")));
+  $("pastSum").textContent = `Previous (${past.length})`;
+  $("pastBox").hidden = !past.length;
+
+  const next = EVENTS.find(e => e.w && e.w.date >= now);
+  $("sub").textContent = next ? `Next: ${next.title}${next.code ? " (" + next.code + ")" : ""}` : "Nothing due right now.";
+  $("foot").textContent = UPDATED ? `Schedule last synced ${UPDATED}` : "";
+}
+
+// ---- Lectures tab: add your Drive links here (one line per link) ----
+const LECTURES = [
+  { code: "MCSE1203", title: "Drive folder", url: "https://drive.google.com/drive/folders/1jrybNbLNtp45trD54ly4emqnITcZZsLr" },
+  { code: "MCSE1204", title: "Drive folder", url: "https://drive.google.com/drive/folders/1uu1ePqixsXI24t5mFBX2Hxa1vRPutyCi" },
+  { code: "MCSE1214", title: "Drive folder", url: "https://drive.google.com/drive/folders/1f1lOm6OVKHj-ydDiHDhU_5qGacHVCB9f" },
+  { code: "GED1200",  title: "Drive folder", url: "https://drive.google.com/drive/folders/1L7mCMNA8jvTNVHQI2tjBBPWsTWvJUAbj" },
+];
+
+function renderLectures() {
+  const codes = [...new Set([...Object.keys(COURSES), ...LECTURES.map(l => l.code)])].sort();
+  const box = $("lectures");
+  if (!codes.length) { box.replaceChildren(el("p", "empty", "No courses found yet.")); return; }
+  box.replaceChildren(...codes.map(code => {
+    const card = el("article", "item course");
+    card.style.setProperty("--c", "var(--class)");
+    card.appendChild(el("div", "t", COURSES[code] || code));
+    card.appendChild(el("div", "meta", code));
+    const links = LECTURES.filter(l => l.code === code && /^https?:\/\//.test(l.url));
+    if (!links.length) card.appendChild(el("div", "body", "No links added yet."));
+    links.forEach(l => {
+      const a = el("a", "link", (l.title || "Open folder") + " \u2197");
+      a.href = l.url; a.target = "_blank"; a.rel = "noopener";
+      card.appendChild(a);
+    });
+    return card;
+  }));
+}
+
+function showTab() {
+  const t = location.hash === "#lectures" ? "lectures" : "home";
+  $("home").hidden = t !== "home";
+  $("lectures").hidden = t !== "lectures";
+  ["home", "lectures"].forEach(k => {
+    const a = $("tab-" + k);
+    if (k === t) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+}
+window.addEventListener("hashchange", showTab);
+showTab(); renderLectures();
+
+fetch(CSV_URL, { cache: "no-cache" })
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); const lm = r.headers.get("last-modified"); if (lm) UPDATED = new Date(lm).toLocaleString("en-GB"); return r.text(); })
+  .then(txt => {
+    const rows = Papa.parse(txt.trim(), { skipEmptyLines: true }).data;
+    load(rows); renderLectures();
+    if (!EVENTS.length && !NOTICES.length) {
+      $("sub").textContent = "";
+      $("upcoming").replaceChildren(el("div", "err", `Read ${rows.length} rows but found no "Title" header. Rows seen: ${JSON.stringify(rows.slice(0, 3).map(r => r.slice(0, 6)))}`));
+      return;
     }
-
-    function typeOf(title) {
-      const t = title.toLowerCase();
-      if (t.startsWith("notice")) return "notice";
-      if (t.includes("assignment")) return "assignment";
-      if (t.includes("presentation")) return "presentation";
-      if (t.includes("lab")) return "lab";
-      if (/^(class|lec|lecture)\b/.test(t)) return "class";
-      if (/^(ct\b|ct-|mid|final)/.test(t)) return "ct";
-      return "other";
-    }
-
-    function load(rows) {
-      EVENTS = []; NOTICES = []; COURSES = {};
-      const clean = rows.map(r => r.map(x => (x || "").replace(/^\uFEFF/, "").trim()));
-      // Find the header cell anywhere, so blank rows/columns around the table don't matter.
-      let h = -1, c = 0;
-      clean.some((r, i) => {
-        let j = r.findIndex(x => x.toLowerCase() === "title");
-        if (j < 0) { const k = r.findIndex(x => /time\s*\/\s*deadline/i.test(x)); if (k >= 2) j = k - 2; }
-        if (j >= 0) { h = i; c = j; return true; }
-        return false;
-      });
-      if (h < 0) return;
-      clean.slice(h + 1).forEach(r => {
-        const [title = "", code = "", when = "", content = "", cCode = "", cName = ""] = r.slice(c);
-        if (/^[A-Za-z]{2,5}\d{3,4}$/.test(cCode) && cName) COURSES[cCode] = cName;
-        if (!title) return;
-        const type = typeOf(title);
-        const item = { title, code: /^-+$/.test(code) ? "" : code, w: parseWhen(when), content, type, raw: when };
-        (type === "notice" ? NOTICES : EVENTS).push(item);
-      });
-      EVENTS.sort((a, b) => (a.w?.date ?? 1e15) - (b.w?.date ?? 1e15));
-    }
-
-    function countdown(item, now) {
-      const diff = item.w.date - now;
-      const unit = item.type === "class" ? "to start" : "left";
-      const mins = Math.floor(diff / 60000), h = Math.floor(mins / 60), d = Math.floor(h / 24);
-      if (d >= 1) return [`${d}d ${h % 24}h ${mins % 60}m`, unit];
-      if (h >= 1) return [`${h}h ${mins % 60}m`, unit];
-      return [`${Math.max(mins, 0)}m`, unit];
-    }
-
-    function fmt(item) {
-      if (!item.w) return item.raw || "Date to be announced";
-      let s = item.w.date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-      if (item.w.timed) s += ", " + item.w.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-      return s;
-    }
-
-    function card(item, now, mode) {            // mode: "notice" | "upcoming" | "past"
-      const box = el("article", "item" + (mode === "notice" ? " notice" : mode === "past" ? " past" : ""));
-      box.style.setProperty("--c", `var(--${item.type})`);
-      if (mode === "upcoming") {
-        const cd = el("div", "cd");
-        if (item.w) {
-          const [big, small] = countdown(item, now);
-          cd.textContent = big; cd.appendChild(el("small", "", small));
-          if (item.w.date - now < 864e5) cd.classList.add("soon");
-        } else cd.textContent = "TBA";
-        box.appendChild(cd);
-      }
-      const info = el("div");
-      info.appendChild(el("div", "t", item.title));
-      const course = item.code ? (COURSES[item.code] ? `${item.code} ${COURSES[item.code]}` : item.code) : "";
-      info.appendChild(el("div", "meta", [course, fmt(item)].filter(Boolean).join(" | ")));
-      if (item.content) info.appendChild(el("div", "body", item.content));
-      box.appendChild(info);
-      return box;
-    }
-
-    function render() {
-      const now = new Date();
-      // Weeks run Fri-Sat. "This week" ends on the Saturday on/after today; "next week" ends 7 days later.
-      const end1 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + ((6 - now.getDay() + 7) % 7), 23, 59, 59, 999);
-      const end2 = new Date(end1); end2.setDate(end2.getDate() + 7);
-
-      const groups = [["This week", "until " + short(end1), [], "Nothing due this week."],
-      ["Next week", "until " + short(end2), [], "Nothing due next week."],
-      ["Later", "", [], ""]];
-      const past = [];
-      EVENTS.forEach(e => {
-        if (e.w && e.w.date < now) past.push(e);
-        else if (e.w && e.w.date <= end1) groups[0][2].push(e);
-        else if (e.w && e.w.date <= end2) groups[1][2].push(e);
-        else groups[2][2].push(e);
-      });
-
-      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()) - 7 * 864e5;
-      $("notices").replaceChildren(...NOTICES.filter(n => !n.w || +n.w.date >= dayStart).map(n => card(n, now, "notice")));
-
-      const nodes = [];
-      groups.forEach(([name, range, items, none]) => {
-        if (!items.length && !none) return;
-        const h = el("h2", "", name); if (range) h.appendChild(el("span", "", range));
-        nodes.push(h);
-        if (items.length) items.forEach(e => nodes.push(card(e, now, "upcoming")));
-        else nodes.push(el("p", "empty", none));
-      });
-      $("upcoming").replaceChildren(...nodes);
-
-      past.reverse();
-      $("past").replaceChildren(...past.map(e => card(e, now, "past")));
-      $("pastSum").textContent = `Previous (${past.length})`;
-      $("pastBox").hidden = !past.length;
-
-      const next = EVENTS.find(e => e.w && e.w.date >= now);
-      $("sub").textContent = next ? `Next: ${next.title}${next.code ? " (" + next.code + ")" : ""}` : "Nothing due right now.";
-      $("foot").textContent = UPDATED ? `Schedule last synced ${UPDATED}` : "";
-    }
-
-    // ---- Lectures tab: add your Drive links here (one line per link) ----
-    const LECTURES = [
-      { code: "MCSE1203", title: "Drive folder", url: "https://drive.google.com/drive/folders/1jrybNbLNtp45trD54ly4emqnITcZZsLr" },
-      { code: "MCSE1204", title: "Drive folder", url: "https://drive.google.com/drive/folders/1uu1ePqixsXI24t5mFBX2Hxa1vRPutyCi" },
-      { code: "MCSE1214", title: "Drive folder", url: "https://drive.google.com/drive/folders/1f1lOm6OVKHj-ydDiHDhU_5qGacHVCB9f" },
-      { code: "GED1200", title: "Drive folder", url: "https://drive.google.com/drive/folders/1L7mCMNA8jvTNVHQI2tjBBPWsTWvJUAbj" },
-    ];
-
-    function renderLectures() {
-      const codes = [...new Set([...Object.keys(COURSES), ...LECTURES.map(l => l.code)])].sort();
-      const box = $("lectures");
-      if (!codes.length) { box.replaceChildren(el("p", "empty", "No courses found yet.")); return; }
-      box.replaceChildren(...codes.map(code => {
-        const card = el("article", "item course");
-        card.style.setProperty("--c", "var(--class)");
-        card.appendChild(el("div", "t", COURSES[code] || code));
-        card.appendChild(el("div", "meta", code));
-        const links = LECTURES.filter(l => l.code === code && /^https?:\/\//.test(l.url));
-        if (!links.length) card.appendChild(el("div", "body", "No links added yet."));
-        links.forEach(l => {
-          const a = el("a", "link", (l.title || "Open folder") + " \u2197");
-          a.href = l.url; a.target = "_blank"; a.rel = "noopener";
-          card.appendChild(a);
-        });
-        return card;
-      }));
-    }
-
-    function showTab() {
-      const t = location.hash === "#lectures" ? "lectures" : "home";
-      $("home").hidden = t !== "home";
-      $("lectures").hidden = t !== "lectures";
-      ["home", "lectures"].forEach(k => {
-        const a = $("tab-" + k);
-        if (k === t) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
-      });
-    }
-    window.addEventListener("hashchange", showTab);
-    showTab(); renderLectures();
-
-    fetch(CSV_URL, { cache: "no-cache" })
-      .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); const lm = r.headers.get("last-modified"); if (lm) UPDATED = new Date(lm).toLocaleString("en-GB"); return r.text(); })
-      .then(txt => {
-        const rows = Papa.parse(txt.trim(), { skipEmptyLines: true }).data;
-        load(rows); renderLectures();
-        if (!EVENTS.length && !NOTICES.length) {
-          $("sub").textContent = "";
-          $("upcoming").replaceChildren(el("div", "err", `Read ${rows.length} rows but found no "Title" header. Rows seen: ${JSON.stringify(rows.slice(0, 3).map(r => r.slice(0, 6)))}`));
-          return;
-        }
-        render(); setInterval(render, 15000);
-      })
-      .catch(err => {
-        $("sub").textContent = "";
-        $("upcoming").replaceChildren(el("div", "err", `Couldn't load data/schedule.csv (${err.message}). Run the sync workflow once from the GitHub Actions tab, then refresh.`));
-      });
-  </script>
+    render(); setInterval(render, 15000);
+  })
+  .catch(err => {
+    $("sub").textContent = "";
+    $("upcoming").replaceChildren(el("div", "err", `Couldn't load data/schedule.csv (${err.message}). Run the sync workflow once from the GitHub Actions tab, then refresh.`));
+  });
+</script>
 </body>
-
 </html>
