@@ -2,7 +2,7 @@
 ,Send Reminder For Upcoming Week,Send Reminder For Tomorrow,Send Reminder For Today,CT-3,GED1200,09/10/2026 14:30,Lec-5,Course Code ,Course Name
 ,,,,Presentation ,GED1200,23/10/2026 14:30,Slides: Research Title + Research Gap + Research Methodology (Figure) + Thank You,MCSE1203,Deep Learning
 ,,,,Assignment (+CT4),GED1200,23/10/2026 14:30,Upload to google drive + Folder Name: ID(Name) + ID(Name).csv + 20 pdfs (scopus indexed conference/journal papers),MCSE1204,Advanced Networking & Network  Security 
-,,,,CT-3 (Online),MCSE1204,10/12/2026 8:30 pm,Data Centre & Network Layer,MCSE1214,ICT Project Management & Quality Assurance 
+,,,,,,,,MCSE1214,ICT Project Management & Quality Assurance 
 ,,,,Lab Submission ,MCSE1203,30/09/2026 23:59,Google Classroom Lab2,GED1200,Research Methodology 
 ,,,,Lab Submission ,MCSE1203,22/09/2026 23:59,Google Classroom Lab1,,
 ,,,,Mid ,MCSE1203,12/09/2026 09:00,Lec 1 to 6,,
@@ -26,3 +26,4 @@ Lecture 2- Transport Layer ",,
 ,,,,Lab 4 Prerequisite ,MCSE1203,10/10/2026 10:30,"Lab-3 must be completed and submitted to Google classroom previously. Warmup-4 is based on that. Please review the standard training loop (five lines: zero_grad, forward, loss, etc).",,
 ,,,,Notice CT-3,MCSE1203,10/10/2026 09:00,Please bring your own calculators. SHARING IS NOT ALLOWED. Exam will be conducted in the lab (on desktop/laptop) but sir instructed us to bring a working physical calculator.,,
 ,,,,Notice Online Class,MCSE1204,12/10/2026 21:00,Online Class to be held after CT -3,,
+,,,,CT-3 (Online),MCSE1204,12/10/2026 20:30,Data Centre & Network Layer,,
